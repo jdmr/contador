@@ -59,6 +59,7 @@ input:focus, select:focus, textarea:focus {
 
 .body {
     float: left;
+    width: 98%;
     margin: 0 15px 10px 15px;
 }
 
