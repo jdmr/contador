@@ -36,7 +36,7 @@ class CuentaController {
     }
 
     def ver = {
-        def cuenta = Cuenta.get(params.id)
+        def cuenta = cuentaService.obtine(params.id)
         if (!cuenta) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'cuenta.label', default: 'Cuenta'), params.id])}"
             redirect(action: "lista")
@@ -58,7 +58,7 @@ class CuentaController {
     }
 
     def actualiza = {
-        def cuenta = Cuenta.get(params.id)
+        def cuenta = cuentaService.obtiene(params.id)
         if (cuenta) {
             if (params.version) {
                 def version = params.version.toLong()
