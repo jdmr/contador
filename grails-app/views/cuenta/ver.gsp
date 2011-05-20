@@ -23,13 +23,6 @@
                     <tbody>
                     
                         <tr class="prop">
-                            <td valign="top" class="name"><g:message code="cuenta.id.label" default="Id" /></td>
-                            
-                            <td valign="top" class="value">${fieldValue(bean: cuenta, field: "id")}</td>
-                            
-                        </tr>
-                    
-                        <tr class="prop">
                             <td valign="top" class="name"><g:message code="cuenta.nombre.label" default="Nombre" /></td>
                             
                             <td valign="top" class="value">${fieldValue(bean: cuenta, field: "nombre")}</td>
