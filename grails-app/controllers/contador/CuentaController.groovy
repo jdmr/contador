@@ -23,13 +23,15 @@ class CuentaController {
     }
 
     def crea = {
-        def crea = new Cuenta(params)
-        if (crea.save(flush: true)) {
-            flash.message = "${message(code: 'default.created.message', args: [message(code: 'cuenta.label', default: 'Cuenta'), crea.id])}"
-            redirect(action: "ver", id: crea.id)
-        }
-        else {
-            render(view: "create", model: [crea: crea])
+        def cuenta = new Cuenta(params)
+        try {
+            cuenta = cuentaService.crea(cuenta)
+
+            flash.message = "${message(code: 'default.created.message', args: [message(code: 'cuenta.label', default: 'Cuenta'), cuenta.descripcion])}"
+            redirect(action: "ver", id: cuenta.id)
+        } catch(Exception e) {
+            log.error("No se pudo crear la cuenta",e)
+            render(view: "nueva", model: [cuenta: cuenta])
         }
     }
 
@@ -45,7 +47,7 @@ class CuentaController {
     }
 
     def edita = {
-        def cuenta = Cuenta.get(params.id)
+        def cuenta = cuentaService.obtiene(params.id)
         if (!cuenta) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'cuenta.label', default: 'Cuenta'), params.id])}"
             redirect(action: "lista")
@@ -67,37 +69,42 @@ class CuentaController {
                     return
                 }
             }
-            cuenta.properties = params
-            if (!cuenta.hasErrors() && cuenta.save(flush: true)) {
-                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'cuenta.label', default: 'Cuenta'), cuenta.id])}"
+            try {
+                cuenta.properties = params
+                cuenta = cuentaService.actualiza(cuenta)
+                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'cuenta.label', default: 'Cuenta'), cuenta.descripcion])}"
                 redirect(action: "ver", id: cuenta.id)
-            }
-            else {
+            } catch(Exception e) {
+                log.error("No se pudo actualizar la cuenta",e)
                 render(view: "edita", model: [cuenta: cuenta])
             }
-        }
-        else {
+
+        } else {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'cuenta.label', default: 'Cuenta'), params.id])}"
             redirect(action: "lista")
         }
     }
 
-    def delete = {
-        def cuenta = Cuenta.get(params.id)
+    def elimina = {
+        log.debug("Eliminando la cuenta")
+        def cuenta = Cuenta.load(params.id)
         if (cuenta) {
             try {
-                cuenta.delete(flush: true)
+                log.debug("Mandando a eliminar la cuenta")
+                cuentaService.elimina(cuenta)
+                log.debug("Cuenta eliminada")
                 flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'cuenta.label', default: 'Cuenta'), params.id])}"
                 redirect(action: "lista")
-            }
-            catch (org.springframework.dao.DataIntegrityViolationException e) {
+            } catch(Exception e) {
+                log.error("No se puedo eliminar la cuenta ${params.id}",e)
                 flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'cuenta.label', default: 'Cuenta'), params.id])}"
                 redirect(action: "ver", id: params.id)
             }
-        }
-        else {
+        } else {
+            log.debug("No se pudo cargar la cuenta")
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'cuenta.label', default: 'Cuenta'), params.id])}"
             redirect(action: "lista")
         }
+
     }
 }
