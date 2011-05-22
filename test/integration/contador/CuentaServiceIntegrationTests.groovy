@@ -3,7 +3,7 @@ package contador
 import grails.test.*
 import org.junit.*
 
-class CuentaServiceTests extends GroovyTestCase {
+class CuentaServiceIntegrationTests extends GroovyTestCase {
 
     def cuentaService
 

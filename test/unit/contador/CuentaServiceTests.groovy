@@ -2,7 +2,7 @@ package contador
 
 import grails.test.*
 
-class CuentaServiceUnitTests extends GrailsUnitTestCase {
+class CuentaServiceTests extends GrailsUnitTestCase {
     protected void setUp() {
         super.setUp()
     }
