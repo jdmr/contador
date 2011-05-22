@@ -48,6 +48,22 @@ class CuentaControllerTests extends ControllerUnitTestCase {
     }
 
     @Test
+    void debieraCrearNuevaCuenta() {
+        mockDomain(Cuenta)
+        def cuentaMock = mockFor(CuentaService)
+        cuentaMock.demand.crea(1..1) { Cuenta cuenta ->
+            return new Cuenta(id:1,version:1,nombre:"T-E-S-T-1",descripcion:"T-E-S-T-1")
+        }
+        controller.cuentaService = cuentaMock.createMock()
+        controller.metaClass.message = { args -> return 'foo' }
+
+        controller.params.nombre = 'T-E-S-T-1'
+        controller.params.descripcion = 'T-E-S-T-1'
+        controller.crea()
+        assertEquals "ver", redirectArgs.action
+    }
+
+    @Test
     void debieraMostrarCuenta() {
         def cuentaMock = mockFor(CuentaService)
         cuentaMock.demand.obtiene(1..1){Integer id ->
@@ -71,5 +87,40 @@ class CuentaControllerTests extends ControllerUnitTestCase {
         def model = controller.edita()
         assert model
         assertEquals 1, model.cuenta.id
+    }
+
+    @Test
+    void debieraActualizarCuenta() {
+        mockDomain(Cuenta)
+        def cuentaMock = mockFor(CuentaService)
+        cuentaMock.demand.obtiene(1..1){Integer id ->
+            return new Cuenta(id:1,version:1,nombre:"T-E-S-T-1",descripcion:"T-E-S-T-1")
+        }
+        cuentaMock.demand.actualiza(1..1){Cuenta cuenta ->
+            return new Cuenta(id:1,version:1,nombre:"T-E-S-T-2",descripcion:"T-E-S-T-2")
+        }
+        controller.cuentaService = cuentaMock.createMock()
+        controller.metaClass.message = { args -> return 'foo' }
+
+        controller.params.id = 1
+        controller.params.nombre = 'T-E-S-T-2'
+        controller.params.descripcion = 'T-E-S-T-2'
+        controller.actualiza()
+        assertEquals 'ver', redirectArgs.action
+    }
+
+    @Test
+    void debieraEliminarCuenta() {
+        mockDomain(Cuenta)
+        def cuentaMock = mockFor(CuentaService)
+        cuentaMock.demand.elimina(1..1) { Cuenta cuenta ->
+            return null
+        }
+        controller.cuentaService = cuentaMock.createMock()
+        controller.metaClass.message = { args -> return 'foo' }
+
+        controller.params.id = 1
+        controller.elimina()
+        assertEquals 'lista', redirectArgs.action
     }
 }
