@@ -61,11 +61,11 @@ class CuentaServiceIntegrationTests extends GroovyTestCase {
         prueba.nombre = 'D-E-M-O'
         def otro = cuentaService.actualiza(prueba)
         assert otro
-        assert 'D-E-M-O',otro.nombre
+        assertEquals 'D-E-M-O',otro.nombre
 
         def demo = cuentaService.obtiene(cuenta.id)
         assert demo
-        assert 'D-E-M-O', demo.nombre
+        assertEquals 'D-E-M-O', demo.nombre
     }
 
     @Test

@@ -3,10 +3,11 @@ package contador
 class Poliza {
     String folio
     String descripcion
-    Boolean cerrada = false
-    String estatus
-    String clasificacion
+    String estatus = 'ABIERTA'
+    String clasificacion = 'DIARIO'
     Set transacciones
+    Date dateCreated
+    Date lastUpdated
 
     static hasMany = [transacciones:Transaccion]
 
