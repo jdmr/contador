@@ -10,7 +10,7 @@
     <body>
         <div class="nav">
             <span class="menuButton"><a class="home" href="${createLink(uri: '/')}"><g:message code="default.home.label"/></a></span>
-            <span class="menuButton"><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></span>
+            <span class="menuButton"><g:link class="create" action="nueva"><g:message code="default.new.label" args="[entityName]" /></g:link></span>
         </div>
         <div class="body">
             <h1><g:message code="default.list.label" args="[entityName]" /></h1>
@@ -18,11 +18,9 @@
             <div class="message">${flash.message}</div>
             </g:if>
             <div class="list">
-                <table>
+                <table id="polizas">
                     <thead>
                         <tr>
-                        
-                            <g:sortableColumn property="id" title="${message(code: 'poliza.id.label', default: 'Id')}" />
                         
                             <g:sortableColumn property="folio" title="${message(code: 'poliza.folio.label', default: 'Folio')}" />
                         
@@ -32,25 +30,19 @@
                         
                             <g:sortableColumn property="clasificacion" title="${message(code: 'poliza.clasificacion.label', default: 'Clasificacion')}" />
                         
-                            <g:sortableColumn property="cerrada" title="${message(code: 'poliza.cerrada.label', default: 'Cerrada')}" />
-                        
                         </tr>
                     </thead>
                     <tbody>
-                    <g:each in="${polizaInstanceList}" status="i" var="polizaInstance">
+                    <g:each in="${polizas}" status="i" var="poliza">
                         <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
                         
-                            <td><g:link action="show" id="${polizaInstance.id}">${fieldValue(bean: polizaInstance, field: "id")}</g:link></td>
+                            <td><g:link action="ver" id="${poliza.id}">${fieldValue(bean: poliza, field: "folio")}</g:link></td>
                         
-                            <td>${fieldValue(bean: polizaInstance, field: "folio")}</td>
+                            <td>${fieldValue(bean: poliza, field: "descripcion")}</td>
                         
-                            <td>${fieldValue(bean: polizaInstance, field: "descripcion")}</td>
+                            <td>${fieldValue(bean: poliza, field: "estatus")}</td>
                         
-                            <td>${fieldValue(bean: polizaInstance, field: "estatus")}</td>
-                        
-                            <td>${fieldValue(bean: polizaInstance, field: "clasificacion")}</td>
-                        
-                            <td><g:formatBoolean boolean="${polizaInstance.cerrada}" /></td>
+                            <td>${fieldValue(bean: poliza, field: "clasificacion")}</td>
                         
                         </tr>
                     </g:each>
@@ -58,8 +50,13 @@
                 </table>
             </div>
             <div class="paginateButtons">
-                <g:paginate total="${polizaInstanceTotal}" />
+                <g:paginate total="${totalDePolizas}" />
             </div>
         </div>
+        <g:javascript>
+            $(document).ready(function() {
+                    highlightTableRows('polizas')
+            });
+        </g:javascript>
     </body>
 </html>

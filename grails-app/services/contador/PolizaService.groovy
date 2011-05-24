@@ -30,7 +30,7 @@ class PolizaService {
         nf.setMaximumIntegerDigits(9);
         nf.setMaximumFractionDigits(0);
 
-        poliza.folio = nf.format(folio.valor)
+        poliza.folio = "T-${nf.format(folio.valor)}"
         poliza.save()
         return poliza
     }
@@ -78,14 +78,15 @@ class PolizaService {
 
         poliza.folio = nf.format(folio.valor)
         poliza.estatus = 'CERRADA'
-        poliza.save()
+        poliza.save(flush:true)
+
         return poliza
     }
 
     def cancela(poliza) {
-        log.debug("Cancelando poliza ${poliza.descripcion}")
+        log.debug("Cancelando poliza ${poliza.folio}")
         poliza.estatus = 'CANCELADA'
-        poliza.save()
+        poliza.save(flush:true)
         return poliza
     }
 }

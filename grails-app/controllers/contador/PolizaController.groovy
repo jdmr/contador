@@ -2,99 +2,132 @@ package contador
 
 class PolizaController {
 
+    def polizaService
+
     static allowedMethods = [save: "POST", update: "POST", delete: "POST"]
 
     def index = {
-        redirect(action: "list", params: params)
+        redirect(action: "lista", params: params)
     }
 
-    def list = {
+    def lista = {
         params.max = Math.min(params.max ? params.int('max') : 10, 100)
-        [polizaInstanceList: Poliza.list(params), polizaInstanceTotal: Poliza.count()]
+        def resultado = polizaService.lista(params)
+        [polizas: resultado.lista, totalDePolizas:resultado.cantidad]
     }
 
-    def create = {
-        def polizaInstance = new Poliza()
-        polizaInstance.properties = params
-        return [polizaInstance: polizaInstance]
+    def nueva = {
+        def poliza = new Poliza()
+        poliza.properties = params
+        return [poliza: poliza]
     }
 
-    def save = {
-        def polizaInstance = new Poliza(params)
-        if (polizaInstance.save(flush: true)) {
-            flash.message = "${message(code: 'default.created.message', args: [message(code: 'poliza.label', default: 'Poliza'), polizaInstance.id])}"
-            redirect(action: "show", id: polizaInstance.id)
+    def crea = {
+        def poliza = new Poliza(params)
+        try {
+            poliza = polizaService.crea(poliza)
+            
+            flash.message = "${message(code: 'default.created.message', args: [message(code: 'poliza.label', default: 'Poliza'), poliza.id])}"
+            redirect(action: "ver", id: poliza.id)
+        } catch(Exception e) {
+            log.error("No se pudo crea la poliza",e)
+            render(view: "nueva", model: [poliza: poliza])
         }
-        else {
-            render(view: "create", model: [polizaInstance: polizaInstance])
-        }
     }
 
-    def show = {
-        def polizaInstance = Poliza.get(params.id)
-        if (!polizaInstance) {
+    def ver = {
+        def poliza = polizaService.obtiene(params.id)
+        if (!poliza) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'poliza.label', default: 'Poliza'), params.id])}"
-            redirect(action: "list")
+            redirect(action: "lista")
         }
         else {
-            [polizaInstance: polizaInstance]
+            [poliza: poliza]
         }
     }
 
-    def edit = {
-        def polizaInstance = Poliza.get(params.id)
-        if (!polizaInstance) {
+    def edita = {
+        def poliza = polizaService.obtiene(params.id)
+        if (!poliza) {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'poliza.label', default: 'Poliza'), params.id])}"
-            redirect(action: "list")
+            redirect(action: "lista")
         }
         else {
-            return [polizaInstance: polizaInstance]
+            return [poliza: poliza]
         }
     }
 
-    def update = {
-        def polizaInstance = Poliza.get(params.id)
-        if (polizaInstance) {
+    def actualiza = {
+        def poliza = polizaService.obtiene(params.id)
+        if (poliza) {
             if (params.version) {
                 def version = params.version.toLong()
-                if (polizaInstance.version > version) {
+                if (poliza.version > version) {
                     
-                    polizaInstance.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'poliza.label', default: 'Poliza')] as Object[], "Another user has updated this Poliza while you were editing")
-                    render(view: "edit", model: [polizaInstance: polizaInstance])
+                    poliza.errors.rejectValue("version", "default.optimistic.locking.failure", [message(code: 'poliza.label', default: 'Poliza')] as Object[], "Another user has updated this Poliza while you were editing")
+                    render(view: "edita", model: [poliza: poliza])
                     return
                 }
             }
-            polizaInstance.properties = params
-            if (!polizaInstance.hasErrors() && polizaInstance.save(flush: true)) {
-                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'poliza.label', default: 'Poliza'), polizaInstance.id])}"
-                redirect(action: "show", id: polizaInstance.id)
-            }
-            else {
-                render(view: "edit", model: [polizaInstance: polizaInstance])
+            try {
+                poliza.properties = params
+                poliza = polizaService.actualiza(poliza)
+                flash.message = "${message(code: 'default.updated.message', args: [message(code: 'poliza.label', default: 'Poliza'), poliza.id])}"
+                redirect(action: "ver", id: poliza.id)
+            } catch(Exception e) {
+                log.error("No se pudo actualizar la poliza",e)
+                render(view: "edita", model: [poliza: poliza])
             }
         }
         else {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'poliza.label', default: 'Poliza'), params.id])}"
-            redirect(action: "list")
+            redirect(action: "lista")
         }
     }
 
-    def delete = {
-        def polizaInstance = Poliza.get(params.id)
-        if (polizaInstance) {
+    def elimina = {
+        log.debug("Eliminando la poliza ${params.id}")
+        def poliza = Poliza.load(params.id)
+        if (poliza) {
             try {
-                polizaInstance.delete(flush: true)
+                polizaService.elimina(poliza)
                 flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'poliza.label', default: 'Poliza'), params.id])}"
-                redirect(action: "list")
-            }
-            catch (org.springframework.dao.DataIntegrityViolationException e) {
+                redirect(action: "lista")
+            } catch(Exception e) {
+                log.error("No se pudo elimina la poliza ${params.id}",e) 
                 flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'poliza.label', default: 'Poliza'), params.id])}"
-                redirect(action: "show", id: params.id)
+                redirect(action: "ver", id: params.id)
             }
         }
         else {
             flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'poliza.label', default: 'Poliza'), params.id])}"
-            redirect(action: "list")
+            redirect(action: "lista")
+        }
+    }
+
+    def cierra = {
+        log.debug("Cerrando la poliza ${params.id}")
+        def poliza = polizaService.obtiene(params.id)
+        if (poliza) {
+            polizaService.cierra(poliza)
+            flash.message = "${message(code: 'poliza.cierra.message', args: [poliza.folio])}"
+            redirect(action: "ver", id: poliza.id)
+        } else {
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'poliza.label', default: 'Poliza'), params.id])}"
+            redirect(action: "lista")
+        }
+    }
+
+    def cancela = {
+        log.debug("Cancelando la poliza ${params.id}")
+        def poliza = polizaService.obtiene(params.id)
+        if (poliza) {
+            polizaService.cancela(poliza)
+            flash.message = "${message(code: 'poliza.cancela.message', args: [poliza.folio])}"
+            redirect(action: "ver", id: poliza.id)
+        } else {
+            flash.message = "${message(code: 'default.not.found.message', args: [message(code: 'poliza.label', default: 'Poliza'), params.id])}"
+            redirect(action: "lista")
         }
     }
 }

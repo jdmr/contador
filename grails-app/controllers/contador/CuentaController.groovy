@@ -12,7 +12,7 @@ class CuentaController {
 
     def lista = {
         params.max = Math.min(params.max ? params.int('max') : 10, 100)
-        def resultado = cuentaService.lista(lista.params)
+        def resultado = cuentaService.lista(params)
         [cuentas: resultado.lista, totalDeCuentas:resultado.cantidad]
     }
 
@@ -96,7 +96,7 @@ class CuentaController {
                 flash.message = "${message(code: 'default.deleted.message', args: [message(code: 'cuenta.label', default: 'Cuenta'), params.id])}"
                 redirect(action: "lista")
             } catch(Exception e) {
-                log.error("No se puedo eliminar la cuenta ${params.id}",e)
+                log.error("No se pudo eliminar la cuenta ${params.id}",e)
                 flash.message = "${message(code: 'default.not.deleted.message', args: [message(code: 'cuenta.label', default: 'Cuenta'), params.id])}"
                 redirect(action: "ver", id: params.id)
             }
